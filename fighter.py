@@ -142,7 +142,11 @@ class Fighter():
             if attack_rect.colliderect(target.rect):
                 hit_position = self.calculate_hit_position(target)
                 target.health -= self.calculate_damage(hit_position)
-                target.hit = True
+
+                # hồi lại 5 máu khi tấn công
+                self.health += 5
+                if self.health > 100: # Giới hạn máu tối đa
+                    self.health = 100
 
     def calculate_hit_position(self, target):
         if target.rect.centery < self.rect.centery:

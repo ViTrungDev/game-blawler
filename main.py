@@ -153,7 +153,13 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-
+    # play attack handing
+    key = pygame.key.get_pressed()
+    if not round_over:
+        if key[pygame.K_r]:
+            fighter_1.attack(fighter_2)
+        if key[pygame.K_KP1]:
+            fighter_2.attack(fighter_1)
     # Update display
     pygame.display.update()
 

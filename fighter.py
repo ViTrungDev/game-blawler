@@ -1,6 +1,6 @@
 import pygame
 
-class Fighter():
+class Fighter:
     def __init__(self, player, x, y, flip, data, sprite_sheet, animation_steps, sound):
         self.player = player
         self.size = data[0]
@@ -12,7 +12,7 @@ class Fighter():
         self.frame_index = 0
         self.image = self.animation_list[self.action][self.frame_index]
         self.update_time = pygame.time.get_ticks()
-        self.rect = pygame.Rect((x, y, 80, 180))  # Player's hitbox
+        self.rect = pygame.Rect((x, y, 80, 180))  # Hitbox
         self.vel_y = 0
         self.running = False
         self.jump = False
@@ -24,8 +24,12 @@ class Fighter():
         self.health = 100
         self.alive = True
 
+        # Damage display variables
+        self.damage_display = []
+        self.damage_display_timer = []
+        self.damage_font = pygame.font.Font(None, 36)  # Khởi tạo font cho hiển thị sát thương
+
     def load_images(self, sprite_sheet, animation_steps):
-        # Extract images from spritesheet
         animation_list = []
         for y, animation in enumerate(animation_steps):
             temp_img_list = []
@@ -43,7 +47,6 @@ class Fighter():
         self.running = False
         self.attack_type = 0
 
-        # Get key presses
         key = pygame.key.get_pressed()
 
         if not self.attacking and self.alive and not round_over:
@@ -141,11 +144,16 @@ class Fighter():
             attack_rect = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2 * self.rect.width, self.rect.height)
             if attack_rect.colliderect(target.rect):
                 hit_position = self.calculate_hit_position(target)
-                target.health -= self.calculate_damage(hit_position)
+                damage = self.calculate_damage(hit_position)
+                target.health -= damage
 
-                # hồi lại 5 máu khi tấn công
+                # Store the damage display
+                target.damage_display.append((damage, target.rect.center))
+                target.damage_display_timer.append(pygame.time.get_ticks())
+
+                # Hồi lại 5 máu khi tấn công
                 self.health += 5
-                if self.health > 100: # Giới hạn máu tối đa
+                if self.health > 100:
                     self.health = 100
 
     def calculate_hit_position(self, target):
@@ -172,3 +180,15 @@ class Fighter():
     def draw(self, surface):
         img = pygame.transform.flip(self.image, self.flip, False)
         surface.blit(img, (self.rect.x - (self.offset[0] * self.image_scale), self.rect.y - (self.offset[1] * self.image_scale)))
+
+    def draw_damage(self, surface):
+        current_time = pygame.time.get_ticks()
+        for i in range(len(self.damage_display) - 1, -1, -1):
+            damage, position = self.damage_display[i]
+            if current_time - self.damage_display_timer[i] < 1000:  # Hiển thị trong 1 giây
+                damage_text = self.damage_font.render(str(damage), True, (255, 0, 0))  # Màu đỏ
+                surface.blit(damage_text, (position[0], position[1] - 20))  # Hiển thị trên mục tiêu
+            else:
+                # Xóa thông báo sát thương cũ
+                del self.damage_display[i]
+                del self.damage_display_timer[i]

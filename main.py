@@ -7,6 +7,9 @@ from fighter import Fighter
 mixer.init()
 pygame.init()
 
+pygame.font.init()  # Khởi tạo font
+damage_font = pygame.font.Font(None, 36)  # Sử dụng font mặc định, cỡ 36
+
 # Set the base directory (assuming the assets folder is in the same directory as the script)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -97,7 +100,6 @@ fighter_2 = Fighter(2, 700, 310, True, WIZARD_DATA, wizard_sheet, WIZARD_ANIMATI
 # Game loop
 run = True
 while run:
-
     clock.tick(FPS)
 
     # Draw background
@@ -129,6 +131,8 @@ while run:
     # Draw fighters
     fighter_1.draw(screen)
     fighter_2.draw(screen)
+    fighter_1.draw_damage(screen)  # Hiển thị sát thương của fighter1
+    fighter_2.draw_damage(screen)  # Hiển thị sát thương của fighter2
 
     # Check for player defeat
     if not round_over:
@@ -153,13 +157,15 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    # play attack handing
+    
+    # Play attack handling
     key = pygame.key.get_pressed()
     if not round_over:
         if key[pygame.K_r]:
             fighter_1.attack(fighter_2)
         if key[pygame.K_KP1]:
             fighter_2.attack(fighter_1)
+
     # Update display
     pygame.display.update()
 
